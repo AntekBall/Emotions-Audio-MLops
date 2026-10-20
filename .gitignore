@@ -5,3 +5,4 @@ artifacts/
 experiments/*.ipynb_checkpoints
 .dvc/tmp/
 .dvc/cache/
+data/
