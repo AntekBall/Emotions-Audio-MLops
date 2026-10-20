@@ -1,0 +1,20 @@
+artifacts_root: artifacts
+
+data_ingestion:
+  root_dir: artifacts/data_ingestion
+  local_data_file: data/  # Points to your existing local Actor folders
+
+feature_extraction:
+  root_dir: artifacts/feature_extraction
+  spectrogram_dir: artifacts/feature_extraction/spectrograms
+  image_size: [224, 224]
+  sample_rate: 22050
+  n_mels: 128
+
+model_trainer:
+  root_dir: artifacts/training
+  trained_model_path: artifacts/training/model.pth
+
+model_evaluation:
+  root_dir: artifacts/evaluation
+  metric_file_name: artifacts/evaluation/scores.json
