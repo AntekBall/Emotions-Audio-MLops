@@ -1,7 +1,7 @@
 import os
-from box import BoxValueError
-from yaml import safe_load
 from box import ConfigBox
+from box.exceptions import BoxValueError
+from yaml import safe_load
 from pathlib import Path
 import logging
 from ensure import ensure_annotations
