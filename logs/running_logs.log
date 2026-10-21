@@ -198,3 +198,4 @@ x==========x]
 [2026-10-21 12:24:16,776: INFO: stage_03_model_evaluation: >>>>>> stage Model Evaluation Stage completed <<<<<<
 
 x==========x]
+[2026-10-21 12:32:15,164: INFO: prediction: Audio Path: data/Actor_01/03-01-01-01-01-01-01.wav | Predicted Emotion: fearful (67.18%)]
