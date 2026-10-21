@@ -26,7 +26,7 @@ To run the fully containerized application locally on your machine, ensure you h
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/AntekBall/Emotions-Audio-MLops](https://github.com/AntekBall/Emotions-Audio-MLops)
+   git clone https://github.com/AntekBall/Emotions-Audio-MLops
    cd Emotions-Audio-MLops
    ```
 2. **Build the Docker image:**
