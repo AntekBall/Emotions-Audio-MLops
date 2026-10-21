@@ -18,3 +18,8 @@ model_trainer:
 model_evaluation:
   root_dir: artifacts/evaluation
   metric_file_name: artifacts/evaluation/scores.json
+
+evaluation:
+  root_dir: artifacts/evaluation
+  model_path: artifacts/training/model.pth
+  metric_file_name: artifacts/evaluation/metrics.json

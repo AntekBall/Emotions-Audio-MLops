@@ -1,7 +1,7 @@
 from pathlib import Path
 from speechEmotion.constants import *
 from speechEmotion.utils.common import read_yaml, create_directories
-from speechEmotion.entity import (FeatureExtractionConfig, TrainingConfig)
+from speechEmotion.entity import (FeatureExtractionConfig, TrainingConfig, EvaluationConfig)
 
 class ConfigurationManager:
     def __init__(
@@ -49,3 +49,20 @@ class ConfigurationManager:
             params_scheduler_gamma=params.SCHEDULER_GAMMA
         )
         return training_config
+
+    def get_evaluation_config(self) -> EvaluationConfig:
+        eval_config = self.config.evaluation
+        feature_extraction = self.config.feature_extraction
+        
+        create_directories([Path(eval_config.root_dir)])
+
+        evaluation_config = EvaluationConfig(
+            root_dir=Path(eval_config.root_dir),
+            model_path=Path(eval_config.model_path),
+            metric_file_name=Path(eval_config.metric_file_name),
+            training_data=Path(feature_extraction.spectrogram_dir),
+            all_params=self.params,
+            image_size=self.params.IMAGE_SIZE,
+            batch_size=self.params.BATCH_SIZE
+        )
+        return evaluation_config

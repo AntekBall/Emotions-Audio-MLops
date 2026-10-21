@@ -24,3 +24,13 @@ class TrainingConfig:
     params_weight_decay: float
     params_base_model: str
     params_scheduler_gamma: float
+
+@dataclass(frozen=True)
+class EvaluationConfig:
+    root_dir: Path
+    model_path: Path
+    metric_file_name: Path
+    training_data: Path
+    all_params: dict
+    image_size: list
+    batch_size: int
