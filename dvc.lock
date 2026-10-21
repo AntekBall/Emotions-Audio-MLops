@@ -1,0 +1,69 @@
+schema: '2.0'
+stages:
+  data_transformation:
+    cmd: python src/speechEmotion/pipeline/stage_01_data_transformation.py
+    deps:
+    - path: src/speechEmotion/components/feature_extraction.py
+      hash: md5
+      md5: 093d975217f9e4617bd582c1baf8fcac
+      size: 3360
+    - path: src/speechEmotion/pipeline/stage_01_data_transformation.py
+      hash: md5
+      md5: 0674b8d63c8ff6a6e823c1706eb83f11
+      size: 916
+    outs:
+    - path: artifacts/feature_extraction/spectrograms
+      hash: md5
+      md5: 2467d0b907c70345ebc8375ec59b9845.dir
+      size: 58015031
+      nfiles: 1440
+  model_trainer:
+    cmd: python src/speechEmotion/pipeline/stage_02_model_trainer.py
+    deps:
+    - path: artifacts/feature_extraction/spectrograms
+      hash: md5
+      md5: 2467d0b907c70345ebc8375ec59b9845.dir
+      size: 58015031
+      nfiles: 1440
+    - path: src/speechEmotion/components/model_trainer.py
+      hash: md5
+      md5: ade074d09a354ee2aaa0184aad55c790
+      size: 6237
+    - path: src/speechEmotion/pipeline/stage_02_model_trainer.py
+      hash: md5
+      md5: 535a7467d7b58b7ff11ceac529c5179f
+      size: 812
+    params:
+      params.yaml:
+        BASE_MODEL: resnet18
+        BATCH_SIZE: 32
+        EPOCHS: 10
+        LEARNING_RATE: 0.001
+        OPTIMIZER: adam
+        SCHEDULER_GAMMA: 0.1
+        WEIGHT_DECAY: 0.0001
+    outs:
+    - path: artifacts/training/model.pth
+      hash: md5
+      md5: 3347fd3b73299a36f9d544d2b33a7102
+      size: 44794955
+  model_evaluation:
+    cmd: python src/speechEmotion/pipeline/stage_03_model_evaluation.py
+    deps:
+    - path: artifacts/training/model.pth
+      hash: md5
+      md5: 3347fd3b73299a36f9d544d2b33a7102
+      size: 44794955
+    - path: src/speechEmotion/components/model_evaluation.py
+      hash: md5
+      md5: e00b065de9d037fb992b1cb34908fb09
+      size: 3408
+    - path: src/speechEmotion/pipeline/stage_03_model_evaluation.py
+      hash: md5
+      md5: b42f128e06b4734856f2da07f4621094
+      size: 842
+    outs:
+    - path: artifacts/evaluation/metrics.json
+      hash: md5
+      md5: 252650953e2c94e4fd1dd5dbf071b9bf
+      size: 82

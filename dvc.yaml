@@ -1,0 +1,35 @@
+stages:
+  data_transformation:
+    cmd: python src/speechEmotion/pipeline/stage_01_data_transformation.py
+    deps:
+      - src/speechEmotion/pipeline/stage_01_data_transformation.py
+      - src/speechEmotion/components/feature_extraction.py
+    outs:
+      - artifacts/feature_extraction/spectrograms
+
+  model_trainer:
+    cmd: python src/speechEmotion/pipeline/stage_02_model_trainer.py
+    deps:
+      - src/speechEmotion/pipeline/stage_02_model_trainer.py
+      - src/speechEmotion/components/model_trainer.py
+      - artifacts/feature_extraction/spectrograms
+    params:
+      - BATCH_SIZE
+      - EPOCHS
+      - LEARNING_RATE
+      - OPTIMIZER
+      - WEIGHT_DECAY
+      - BASE_MODEL
+      - SCHEDULER_GAMMA
+    outs:
+      - artifacts/training/model.pth
+
+  model_evaluation:
+    cmd: python src/speechEmotion/pipeline/stage_03_model_evaluation.py
+    deps:
+      - src/speechEmotion/pipeline/stage_03_model_evaluation.py
+      - src/speechEmotion/components/model_evaluation.py
+      - artifacts/training/model.pth
+    metrics:
+      - artifacts/evaluation/metrics.json:
+          cache: false
