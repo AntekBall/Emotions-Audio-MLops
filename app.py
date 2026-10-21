@@ -8,6 +8,7 @@ from PIL import Image
 import numpy as np
 from torchvision import transforms, models
 import pandas as pd
+import yaml
 
 # Page Configuration
 st.set_page_config(
@@ -29,7 +30,7 @@ EMOTION_MAP = {
 
 @st.cache_resource
 def load_model():
-    """Loads the trained ResNet34 model."""
+    """Dynamically loads the trained ResNet backbone model and weights."""
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model_path = "artifacts/training/model.pth"
     
@@ -37,9 +38,26 @@ def load_model():
         st.error(f"Model checkpoint not found at {model_path}. Please run training first!")
         return None, device
 
-    model = models.resnet18(weights=None)
+    # Read configuration from params.yaml to match backbone and classes
+    try:
+        with open("params.yaml", "r") as f:
+            params = yaml.safe_load(f)
+        base_model = params.get("BASE_MODEL", "resnet34").lower()
+        num_classes = params.get("CLASSES", 8)
+    except Exception:
+        base_model = "resnet34"
+        num_classes = 8
+
+    # Instantiate matching backbone
+    if base_model == "resnet50":
+        model = models.resnet50(weights=None)
+    elif base_model == "resnet34":
+        model = models.resnet34(weights=None)
+    else:
+        model = models.resnet18(weights=None)
+
     num_ftrs = model.fc.in_features
-    model.fc = torch.nn.Linear(num_ftrs, 8)
+    model.fc = torch.nn.Linear(num_ftrs, num_classes)
     model.load_state_dict(torch.load(model_path, map_location=device))
     model.to(device)
     model.eval()
@@ -56,7 +74,7 @@ transform = transforms.Compose([
 # App UI Header
 st.title("🎙️ Speech Emotion Recognition (SER)")
 st.markdown("""
-This application uses a fine-tuned **ResNet18** deep learning model trained on Mel-spectrograms to detect emotions from speech audio files. 
+This application uses a fine-tuned **ResNet34** deep learning model trained on Mel-spectrograms to detect emotions from speech audio files. 
 Built as part of an end-to-end production-grade **MLOps pipeline** (PyTorch, MLflow, DVC).
 """)
 
@@ -64,7 +82,7 @@ st.markdown("---")
 
 # Sidebar for Quick Samples
 st.sidebar.header("⚡ Quick Test Samples")
-st.sidebar.markdown("Don't have an audio file handy? Try one of these pre-loaded samples:")
+st.sidebar.markdown("If you don't have an audio sample, try one of these pre-loaded samples:")
 
 sample_files = {
     "Select a sample...": None,
