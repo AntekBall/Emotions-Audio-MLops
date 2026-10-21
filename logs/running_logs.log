@@ -1,0 +1,6 @@
+[2026-10-21 11:34:02,204: INFO: common: yaml file: config\config.yaml loaded successfully]
+[2026-10-21 11:34:02,209: INFO: common: yaml file: params.yaml loaded successfully]
+[2026-10-21 11:34:02,209: INFO: common: created directory at: artifacts]
+[2026-10-21 11:34:02,209: INFO: common: created directory at: artifacts\feature_extraction]
+[2026-10-21 11:34:02,209: INFO: feature_extraction: Starting feature extraction for 24 actors...]
+[2026-10-21 11:35:34,787: INFO: feature_extraction: Feature extraction complete! Successfully processed and saved 1440 spectrogram images.]
