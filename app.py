@@ -74,8 +74,7 @@ transform = transforms.Compose([
 # App UI Header
 st.title("🎙️ Speech Emotion Recognition (SER)")
 st.markdown("""
-This application uses a fine-tuned **ResNet34** deep learning model trained on Mel-spectrograms to detect emotions from speech audio files. 
-Built as part of an end-to-end production-grade **MLOps pipeline** (PyTorch, MLflow, DVC).
+This application uses a fine-tuned **ResNet** deep learning model trained on Mel-spectrograms to detect emotions from speech audio files. 
 """)
 
 st.markdown("---")

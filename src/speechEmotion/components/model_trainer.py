@@ -108,7 +108,7 @@ class ModelTrainer:
         with open("params.yaml", "r") as f:
             params = yaml.safe_load(f)
         
-        n_trials = params.get("HPO", {}).get("N_TRIALS", 1)
+        n_trials = params.get("HPO", {}).get("N_TRIALS", 10)
         logger.info(f"Starting Optuna Hyperparameter Optimization Study for {n_trials} trials...")
 
         def objective(trial):

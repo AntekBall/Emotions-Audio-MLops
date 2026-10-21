@@ -514,3 +514,14 @@ RuntimeError: Error(s) in loading state_dict for ResNet:
 [2026-10-21 15:02:06,709: INFO: stage_03_model_evaluation: >>>>>> stage Model Evaluation Stage completed <<<<<<
 
 x==========x]
+[2026-10-21 15:10:10,819: INFO: stage_02_model_trainer: >>>>>> stage Model Training Stage started <<<<<<]
+[2026-10-21 15:10:10,820: INFO: common: yaml file: config\config.yaml loaded successfully]
+[2026-10-21 15:10:10,821: INFO: common: yaml file: params.yaml loaded successfully]
+[2026-10-21 15:10:10,821: INFO: common: created directory at: artifacts]
+[2026-10-21 15:10:10,821: INFO: common: created directory at: artifacts\training]
+[2026-10-21 15:10:10,872: INFO: model_trainer: Loaded dataset: 1200 training samples, 240 test samples.]
+[2026-10-21 15:10:10,873: INFO: model_trainer: Starting Optuna Hyperparameter Optimization Study for 10 trials...]
+[2026-10-21 15:10:10,874: INFO: model_trainer: Initializing backbone model: resnet34]
+[2026-10-21 15:12:43,903: INFO: model_trainer: Initializing backbone model: resnet34]
+[2026-10-21 15:15:18,237: INFO: model_trainer: Initializing backbone model: resnet34]
+[2026-10-21 15:17:51,250: INFO: model_trainer: Initializing backbone model: resnet34]
