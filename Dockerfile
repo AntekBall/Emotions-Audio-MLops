@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code and model artifacts explicitly
 COPY app.py .
 COPY samples/ ./samples/
-COPY artifacts/training/model.pth ./artifacts/training/model.pth
+#COPY artifacts/training/model.pth ./artifacts/training/model.pth
 
 EXPOSE 7860
 
