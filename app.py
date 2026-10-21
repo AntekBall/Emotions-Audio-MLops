@@ -2,6 +2,7 @@ import streamlit as st
 import os
 import torch
 import librosa
+import urllib.request
 import librosa.display
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -9,6 +10,11 @@ import numpy as np
 from torchvision import transforms, models
 import pandas as pd
 import yaml
+
+MODEL_DIR = "artifacts/training"
+MODEL_PATH = os.path.join(MODEL_DIR, "model.pth")
+
+MODEL_URL ="https://github.com/AntekBall/Emotions-Audio-MLops/releases/download/v1.0.0/model.pth"
 
 # Page Configuration
 st.set_page_config(
@@ -34,11 +40,17 @@ def load_model():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model_path = "artifacts/training/model.pth"
     
+    
     if not os.path.exists(model_path):
-        st.error(f"Model checkpoint not found at {model_path}. Please run training first!")
-        return None, device
+        os.makedirs(os.path.dirname(model_path), exist_ok=True)
+        try:
+            with st.spinner("Downloading model weights from release... Please wait."):
+                urllib.request.urlretrieve(MODEL_URL, model_path)
+        except Exception as e:
+            st.error(f"Failed to download model checkpoint: {e}")
+            return None, device
 
-    # Read configuration from params.yaml to match backbone and classes
+    
     try:
         with open("params.yaml", "r") as f:
             params = yaml.safe_load(f)

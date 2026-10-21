@@ -27,8 +27,8 @@ stages:
       nfiles: 1440
     - path: src/speechEmotion/components/model_trainer.py
       hash: md5
-      md5: 2b0dafad05fd42697a66cbde09a6bd42
-      size: 7392
+      md5: 711eef62dee22d1595bb8f25c76869aa
+      size: 7393
     - path: src/speechEmotion/pipeline/stage_02_model_trainer.py
       hash: md5
       md5: 535a7467d7b58b7ff11ceac529c5179f
@@ -45,14 +45,14 @@ stages:
     outs:
     - path: artifacts/training/model.pth
       hash: md5
-      md5: 9e3923bfd2ab2ab50e69acfb7b697286
+      md5: c0e8e73ddb27c08c16b7ed2a76cf8a54
       size: 85283531
   model_evaluation:
     cmd: python src/speechEmotion/pipeline/stage_03_model_evaluation.py
     deps:
     - path: artifacts/training/model.pth
       hash: md5
-      md5: 9e3923bfd2ab2ab50e69acfb7b697286
+      md5: c0e8e73ddb27c08c16b7ed2a76cf8a54
       size: 85283531
     - path: src/speechEmotion/components/model_evaluation.py
       hash: md5
@@ -65,5 +65,5 @@ stages:
     outs:
     - path: artifacts/evaluation/metrics.json
       hash: md5
-      md5: 9e0d5baf916c58b5c2390793261225de
-      size: 73
+      md5: 9d3f5e42921ab06b8d674eabd6ce30d2
+      size: 61
