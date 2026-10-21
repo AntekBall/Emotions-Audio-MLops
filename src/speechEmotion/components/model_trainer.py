@@ -138,6 +138,6 @@ class ModelTrainer:
         torch.save(model.state_dict(), self.config.trained_model_path)
         logger.info(f"Trained model successfully saved at: {self.config.trained_model_path}")
 
-        # Log model artifact to MLflow
-        mlflow.pytorch.log_model(model, "model")
+        
+        mlflow.pytorch.log_model(model, name="model", serialization_format="pickle")
         mlflow.end_run()
