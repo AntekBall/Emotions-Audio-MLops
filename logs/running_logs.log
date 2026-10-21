@@ -86,3 +86,72 @@
 [2026-10-21 12:09:10,277: INFO: common: json file saved at: artifacts\evaluation\metrics.json]
 [2026-10-21 12:09:10,277: INFO: model_evaluation: Evaluation metrics saved to artifacts\evaluation\metrics.json]
 [2026-10-21 12:09:10,947: INFO: model_evaluation: Validation Loss: 0.1073 | Validation Accuracy: 0.9757]
+[2026-10-21 12:14:10,045: INFO: stage_01_data_transformation: >>>>>> stage Data Transformation & Feature Extraction Stage started <<<<<<]
+[2026-10-21 12:14:10,046: INFO: common: yaml file: config\config.yaml loaded successfully]
+[2026-10-21 12:14:10,046: INFO: common: yaml file: params.yaml loaded successfully]
+[2026-10-21 12:14:10,047: INFO: common: created directory at: artifacts]
+[2026-10-21 12:14:10,047: INFO: common: created directory at: artifacts\feature_extraction]
+[2026-10-21 12:14:10,047: ERROR: stage_01_data_transformation: 'FeatureExtraction' object has no attribute 'process_audio_files']
+Traceback (most recent call last):
+  File "C:\Users\antek\Audio_ml\src\speechEmotion\pipeline\stage_01_data_transformation.py", line 21, in <module>
+    obj.main()
+  File "C:\Users\antek\Audio_ml\src\speechEmotion\pipeline\stage_01_data_transformation.py", line 15, in main
+    feature_extraction.process_audio_files() # Or whatever your main method name is in that component
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'FeatureExtraction' object has no attribute 'process_audio_files'
+[2026-10-21 12:14:32,285: INFO: stage_01_data_transformation: >>>>>> stage Data Transformation & Feature Extraction Stage started <<<<<<]
+[2026-10-21 12:14:32,286: INFO: common: yaml file: config\config.yaml loaded successfully]
+[2026-10-21 12:14:32,287: INFO: common: yaml file: params.yaml loaded successfully]
+[2026-10-21 12:14:32,287: INFO: common: created directory at: artifacts]
+[2026-10-21 12:14:32,287: INFO: common: created directory at: artifacts\feature_extraction]
+[2026-10-21 12:14:32,287: ERROR: stage_01_data_transformation: 'FeatureExtraction' object has no attribute 'process_audio_files']
+Traceback (most recent call last):
+  File "C:\Users\antek\Audio_ml\src\speechEmotion\pipeline\stage_01_data_transformation.py", line 21, in <module>
+    obj.main()
+  File "C:\Users\antek\Audio_ml\src\speechEmotion\pipeline\stage_01_data_transformation.py", line 15, in main
+    feature_extraction.process_audio_files() # Or whatever your main method name is in that component
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'FeatureExtraction' object has no attribute 'process_audio_files'
+[2026-10-21 12:14:40,199: INFO: stage_01_data_transformation: >>>>>> stage Data Transformation & Feature Extraction Stage started <<<<<<]
+[2026-10-21 12:14:40,200: INFO: common: yaml file: config\config.yaml loaded successfully]
+[2026-10-21 12:14:40,201: INFO: common: yaml file: params.yaml loaded successfully]
+[2026-10-21 12:14:40,201: INFO: common: created directory at: artifacts]
+[2026-10-21 12:14:40,202: INFO: common: created directory at: artifacts\feature_extraction]
+[2026-10-21 12:14:40,202: INFO: feature_extraction: Starting feature extraction for 24 actors...]
+[2026-10-21 12:14:40,395: INFO: feature_extraction: Feature extraction complete! Successfully processed and saved 0 spectrogram images.]
+[2026-10-21 12:14:40,395: INFO: stage_01_data_transformation: >>>>>> stage Data Transformation & Feature Extraction Stage completed <<<<<<
+
+x==========x]
+[2026-10-21 12:14:56,638: INFO: stage_02_model_trainer: >>>>>> stage Model Training Stage started <<<<<<]
+[2026-10-21 12:14:56,639: INFO: common: yaml file: config\config.yaml loaded successfully]
+[2026-10-21 12:14:56,639: INFO: common: yaml file: params.yaml loaded successfully]
+[2026-10-21 12:14:56,639: INFO: common: created directory at: artifacts]
+[2026-10-21 12:14:56,640: INFO: common: created directory at: artifacts\training]
+[2026-10-21 12:14:56,698: INFO: model_trainer: Dataset loaded: 1152 training samples, 288 validation samples.]
+[2026-10-21 12:14:57,544: INFO: model_trainer: Starting training on device: cuda for 10 epochs...]
+[2026-10-21 12:15:11,796: INFO: model_trainer: Epoch [1/10] | Train Loss: 1.5174 | Train Acc: 0.4375 | Val Loss: 1.3001 | Val Acc: 0.5556]
+[2026-10-21 12:15:25,664: INFO: model_trainer: Epoch [2/10] | Train Loss: 0.8961 | Train Acc: 0.6753 | Val Loss: 1.4621 | Val Acc: 0.5000]
+[2026-10-21 12:15:39,841: INFO: model_trainer: Epoch [3/10] | Train Loss: 0.4969 | Train Acc: 0.8333 | Val Loss: 2.1632 | Val Acc: 0.4792]
+[2026-10-21 12:15:54,080: INFO: model_trainer: Epoch [4/10] | Train Loss: 0.4482 | Train Acc: 0.8368 | Val Loss: 2.3314 | Val Acc: 0.3785]
+[2026-10-21 12:16:08,401: INFO: model_trainer: Epoch [5/10] | Train Loss: 0.3436 | Train Acc: 0.8819 | Val Loss: 1.0404 | Val Acc: 0.6562]
+[2026-10-21 12:16:22,566: INFO: model_trainer: Epoch [6/10] | Train Loss: 0.1507 | Train Acc: 0.9601 | Val Loss: 0.5211 | Val Acc: 0.7778]
+[2026-10-21 12:16:36,910: INFO: model_trainer: Epoch [7/10] | Train Loss: 0.0618 | Train Acc: 0.9896 | Val Loss: 0.4541 | Val Acc: 0.8264]
+[2026-10-21 12:16:51,895: INFO: model_trainer: Epoch [8/10] | Train Loss: 0.0311 | Train Acc: 0.9974 | Val Loss: 0.4166 | Val Acc: 0.8368]
+[2026-10-21 12:17:06,523: INFO: model_trainer: Epoch [9/10] | Train Loss: 0.0229 | Train Acc: 1.0000 | Val Loss: 0.4207 | Val Acc: 0.8507]
+[2026-10-21 12:17:20,838: INFO: model_trainer: Epoch [10/10] | Train Loss: 0.0194 | Train Acc: 1.0000 | Val Loss: 0.4028 | Val Acc: 0.8507]
+[2026-10-21 12:17:20,876: INFO: model_trainer: Trained model successfully saved at: artifacts\training\model.pth]
+[2026-10-21 12:17:25,193: INFO: stage_02_model_trainer: >>>>>> stage Model Training Stage completed <<<<<<
+
+x==========x]
+[2026-10-21 12:17:46,280: INFO: stage_03_model_evaluation: >>>>>> stage Model Evaluation Stage started <<<<<<]
+[2026-10-21 12:17:46,282: INFO: common: yaml file: config\config.yaml loaded successfully]
+[2026-10-21 12:17:46,282: INFO: common: yaml file: params.yaml loaded successfully]
+[2026-10-21 12:17:46,283: INFO: common: created directory at: artifacts]
+[2026-10-21 12:17:46,283: INFO: common: created directory at: artifacts\evaluation]
+[2026-10-21 12:17:46,510: INFO: model_evaluation: Running evaluation on validation dataset...]
+[2026-10-21 12:17:54,888: INFO: common: json file saved at: artifacts\evaluation\metrics.json]
+[2026-10-21 12:17:54,888: INFO: model_evaluation: Evaluation metrics saved to artifacts\evaluation\metrics.json]
+[2026-10-21 12:17:55,598: INFO: model_evaluation: Validation Loss: 0.0950 | Validation Accuracy: 0.9688]
+[2026-10-21 12:17:55,599: INFO: stage_03_model_evaluation: >>>>>> stage Model Evaluation Stage completed <<<<<<
+
+x==========x]
