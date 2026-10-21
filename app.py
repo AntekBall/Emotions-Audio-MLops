@@ -29,7 +29,7 @@ EMOTION_MAP = {
 
 @st.cache_resource
 def load_model():
-    """Loads the trained ResNet18 model."""
+    """Loads the trained ResNet34 model."""
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model_path = "artifacts/training/model.pth"
     

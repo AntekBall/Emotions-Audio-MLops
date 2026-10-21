@@ -27,8 +27,8 @@ stages:
       nfiles: 1440
     - path: src/speechEmotion/components/model_trainer.py
       hash: md5
-      md5: f752840b8fabfe48a03da99b4368e646
-      size: 6398
+      md5: 2b0dafad05fd42697a66cbde09a6bd42
+      size: 7392
     - path: src/speechEmotion/pipeline/stage_02_model_trainer.py
       hash: md5
       md5: 535a7467d7b58b7ff11ceac529c5179f
@@ -38,14 +38,14 @@ stages:
         BASE_MODEL: resnet34
         BATCH_SIZE: 32
         EPOCHS: 25
-        LEARNING_RATE: 0.0005
+        LEARNING_RATE: 0.0003
         OPTIMIZER: adam
-        SCHEDULER_GAMMA: 0.5
+        SCHEDULER_GAMMA: 0.7
         WEIGHT_DECAY: 0.0005
     outs:
     - path: artifacts/training/model.pth
       hash: md5
-      md5: 4e46f7804c96b255b401336dda26b7df
+      md5: 9e3923bfd2ab2ab50e69acfb7b697286
       size: 85283531
   model_evaluation:
     cmd: python src/speechEmotion/pipeline/stage_03_model_evaluation.py

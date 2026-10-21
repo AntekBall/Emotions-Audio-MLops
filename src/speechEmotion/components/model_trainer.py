@@ -103,13 +103,19 @@ class ModelTrainer:
         """Executes Optuna hyperparameter search, trains the final best model, and logs everything to MLflow."""
         train_loader, test_loader, class_names = self.get_data_loaders()
         
-        logger.info("Starting Optuna Hyperparameter Optimization Study...")
+        # Load N_TRIALS dynamically from params.yaml
+        import yaml
+        with open("params.yaml", "r") as f:
+            params = yaml.safe_load(f)
+        
+        n_trials = params.get("HPO", {}).get("N_TRIALS", 1)
+        logger.info(f"Starting Optuna Hyperparameter Optimization Study for {n_trials} trials...")
 
         def objective(trial):
             return self.train_single_trial(trial, train_loader, test_loader, class_names)
 
         study = optuna.create_study(direction="maximize")
-        study.optimize(objective, n_trials=10)
+        study.optimize(objective, n_trials=n_trials)
 
         logger.info(f"Best Trial Accuracy: {study.best_value:.4f}")
         logger.info(f"Best Hyperparameters: {study.best_params}")
@@ -148,9 +154,9 @@ class ModelTrainer:
         torch.save(model.state_dict(), self.config.trained_model_path)
         logger.info(f"Optimized model successfully saved at: {self.config.trained_model_path}")
 
-        # Log champion model to MLflow
+        # Log champion model to MLflow using safe legacy pickle serialization
         mlflow.start_run(nested=True)
         mlflow.log_params(study.best_params)
         mlflow.log_metric("best_test_accuracy", study.best_value)
-        mlflow.pytorch.log_model(model, name="model")
+        mlflow.pytorch.log_model(model, artifact_path="model", serialization_format="pickle")
         mlflow.end_run()
