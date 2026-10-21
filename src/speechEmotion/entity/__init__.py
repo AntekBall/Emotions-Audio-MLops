@@ -20,3 +20,7 @@ class TrainingConfig:
     params_batch_size: int
     params_image_size: list
     params_learning_rate: float
+    params_optimizer: str
+    params_weight_decay: float
+    params_base_model: str
+    params_scheduler_gamma: float

@@ -42,6 +42,10 @@ class ConfigurationManager:
             params_epochs=params.EPOCHS,
             params_batch_size=params.BATCH_SIZE,
             params_image_size=params.IMAGE_SIZE,
-            params_learning_rate=params.LEARNING_RATE
+            params_learning_rate=params.LEARNING_RATE,
+            params_optimizer=params.OPTIMIZER,
+            params_weight_decay=params.WEIGHT_DECAY,
+            params_base_model=params.BASE_MODEL,
+            params_scheduler_gamma=params.SCHEDULER_GAMMA
         )
         return training_config
