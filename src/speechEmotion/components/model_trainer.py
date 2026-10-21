@@ -16,7 +16,7 @@ class ModelTrainer:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def get_data_loaders(self):
-        """Prepares PyTorch DataLoaders for training and validation from spectrogram images."""
+        """Prepares PyTorch DataLoaders for training and testing from actor-independent split folders."""
         image_size = tuple(self.config.params_image_size)
         
         transform = transforms.Compose([
@@ -25,18 +25,19 @@ class ModelTrainer:
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
 
-        dataset = datasets.ImageFolder(root=str(self.config.training_data), transform=transform)
-        
-        # 80-20 Train-Validation Split
-        train_size = int(0.8 * len(dataset))
-        val_size = len(dataset) - train_size
-        train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
+        # Define paths for train and test splits based on the feature extraction output root
+        train_dir = Path(self.config.training_data) / "train"
+        test_dir = Path(self.config.training_data) / "test"
+
+        # Load datasets using ImageFolder
+        train_dataset = datasets.ImageFolder(root=str(train_dir), transform=transform)
+        test_dataset = datasets.ImageFolder(root=str(test_dir), transform=transform)
 
         train_loader = DataLoader(train_dataset, batch_size=self.config.params_batch_size, shuffle=True, num_workers=2)
-        val_loader = DataLoader(val_dataset, batch_size=self.config.params_batch_size, shuffle=False, num_workers=2)
+        test_loader = DataLoader(test_dataset, batch_size=self.config.params_batch_size, shuffle=False, num_workers=2)
 
-        logger.info(f"Dataset loaded: {train_size} training samples, {val_size} validation samples.")
-        return train_loader, val_loader, dataset.classes
+        logger.info(f"Actor-independent dataset loaded: {len(train_dataset)} training samples, {len(test_dataset)} test samples.")
+        return train_loader, test_loader, train_dataset.classes
 
     def get_model(self, num_classes: int):
         """Initializes the pretrained backbone model and modifies the classification head."""

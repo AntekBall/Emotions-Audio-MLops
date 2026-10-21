@@ -1,5 +1,6 @@
 import os
 import glob
+import yaml
 import librosa
 import librosa.display
 import matplotlib.pyplot as plt
@@ -11,11 +12,18 @@ from speechEmotion.entity import FeatureExtractionConfig
 class FeatureExtraction:
     def __init__(self, config: FeatureExtractionConfig):
         self.config = config
+        
+        # Load train/test actors from params.yaml
+        with open("params.yaml", "r") as f:
+            params = yaml.safe_load(f)
+        
+        self.train_actors = [f"Actor_{str(a).zfill(2)}" for a in params.get("TRAIN_ACTORS", list(range(1, 21)))]
+        self.test_actors = [f"Actor_{str(a).zfill(2)}" for a in params.get("TEST_ACTORS", [21, 22, 23, 24])]
 
     def extract_features(self):
         """
-        Loops through RAVDESS dataset audio files, converts them to Mel-spectrograms,
-        and saves them into emotion-labeled directories for PyTorch 2D CNN training.
+        Loops through RAVDESS dataset audio files, performs actor-independent splitting,
+        converts them to Mel-spectrograms, and saves them into train/test split directories.
         """
         emotion_map = {
             "01": "neutral",
@@ -33,10 +41,20 @@ class FeatureExtraction:
             logger.warning("No Actor directories found in data/ folder!")
             return
 
-        logger.info(f"Starting feature extraction for {len(actor_directories)} actors...")
+        logger.info(f"Starting actor-independent feature extraction for {len(actor_directories)} actors...")
 
         total_processed = 0
         for actor_dir in actor_directories:
+            actor_name = os.path.basename(actor_dir)
+            
+            # Determine split based on actor ID
+            if actor_name in self.train_actors:
+                split = "train"
+            elif actor_name in self.test_actors:
+                split = "test"
+            else:
+                continue  # Skip actors not listed
+
             audio_files = glob.glob(os.path.join(actor_dir, "*.wav"))
             for audio_file in audio_files:
                 filename = os.path.basename(audio_file)
@@ -48,14 +66,14 @@ class FeatureExtraction:
                 if emotion_label == "unknown":
                     continue
 
-                # Define output path: artifacts/feature_extraction/spectrograms/{emotion_label}/
-                out_dir = self.config.spectrogram_dir / emotion_label
+                # Define output path: artifacts/feature_extraction/spectrograms/{split}/{emotion_label}/
+                out_dir = self.config.spectrogram_dir / split / emotion_label
                 os.makedirs(out_dir, exist_ok=True)
                 
                 file_stem = Path(filename).stem
                 output_image_path = out_dir / f"{file_stem}.png"
 
-                # Skip if already processed to save time on re-runs
+                # Skip if already processed
                 if output_image_path.exists():
                     continue
 
@@ -80,4 +98,4 @@ class FeatureExtraction:
                 except Exception as e:
                     logger.error(f"Error processing {audio_file}: {e}")
 
-        logger.info(f"Feature extraction complete! Successfully processed and saved {total_processed} spectrogram images.")
+        logger.info(f"Actor-independent feature extraction complete! Processed and saved {total_processed} spectrograms.")

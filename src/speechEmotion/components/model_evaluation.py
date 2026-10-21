@@ -21,7 +21,7 @@ class ModelEvaluation:
         return accuracy
 
     def evaluate(self):
-        """Loads trained model, runs inference on validation split, computes metrics, and logs to MLflow."""
+        """Loads trained model, runs inference on actor-independent test split, computes metrics, and logs to MLflow."""
         image_size = tuple(self.config.image_size)
         
         transform = transforms.Compose([
@@ -30,20 +30,17 @@ class ModelEvaluation:
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
 
-        dataset = datasets.ImageFolder(root=str(self.config.training_data), transform=transform)
-        class_names = dataset.classes
+        # Point directly to the actor-independent test split folder
+        test_dir = Path(self.config.training_data) / "test"
+        
+        test_dataset = datasets.ImageFolder(root=str(test_dir), transform=transform)
+        test_loader = DataLoader(test_dataset, batch_size=self.config.batch_size, shuffle=False, num_workers=2)
 
-        # Same 80-20 Split used during training to access validation subset
-        train_size = int(0.8 * len(dataset))
-        val_size = len(dataset) - train_size
-        _, val_dataset = random_split(dataset, [train_size, val_size])
-
-        val_loader = DataLoader(val_dataset, batch_size=self.config.batch_size, shuffle=False, num_workers=2)
-
-        # Load ResNet model architecture and weights
+        # Load ResNet model architecture and weights (explicitly 8 classes for RAVDESS)
+        num_classes = 8
         model = models.resnet18(weights=None)
         num_ftrs = model.fc.in_features
-        model.fc = nn.Linear(num_ftrs, len(class_names))
+        model.fc = nn.Linear(num_ftrs, num_classes)
         
         model.load_state_dict(torch.load(self.config.model_path, map_location=self.device))
         model.to(self.device)
@@ -55,9 +52,9 @@ class ModelEvaluation:
         all_labels = []
         total_loss = 0.0
 
-        logger.info("Running evaluation on validation dataset...")
+        logger.info("Running evaluation on actor-independent test dataset...")
         with torch.no_grad():
-            for inputs, labels in val_loader:
+            for inputs, labels in test_loader:
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
                 outputs = model(inputs)
                 loss = criterion(outputs, labels)
@@ -68,11 +65,11 @@ class ModelEvaluation:
                 all_preds.extend(preds.cpu().numpy())
                 all_labels.extend(labels.cpu().numpy())
 
-        val_loss = total_loss / len(val_loader.dataset)
+        test_loss = total_loss / len(test_loader.dataset)
         accuracy = self.eval_metrics(all_labels, all_preds)
 
         scores = {
-            "val_loss": float(val_loss),
+            "val_loss": float(test_loss),
             "val_accuracy": float(accuracy)
         }
         
@@ -85,4 +82,4 @@ class ModelEvaluation:
         mlflow.log_metrics(scores)
         mlflow.end_run()
 
-        logger.info(f"Validation Loss: {val_loss:.4f} | Validation Accuracy: {accuracy:.4f}")
+        logger.info(f"Test Loss: {test_loss:.4f} | Test Accuracy: {accuracy:.4f}")

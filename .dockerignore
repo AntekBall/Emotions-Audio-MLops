@@ -1,0 +1,8 @@
+venv/
+.git/
+.dvc/
+data/
+mlruns/
+__pycache__/
+*.pyc
+*.wav

@@ -62,25 +62,49 @@ Built as part of an end-to-end production-grade **MLOps pipeline** (PyTorch, MLf
 
 st.markdown("---")
 
-# File Uploader
-uploaded_file = st.file_uploader("Upload a speech audio file (.wav)", type=["wav"])
+# Sidebar for Quick Samples
+st.sidebar.header("⚡ Quick Test Samples")
+st.sidebar.markdown("Don't have an audio file handy? Try one of these pre-loaded samples:")
+
+sample_files = {
+    "Select a sample...": None,
+    "Calm Speech Sample": "samples/calm.wav",
+    "Suprised Speech Sample": "samples/suprised.wav",
+    "Happy Speech Sample": "samples/happy.wav"
+}
+
+selected_sample_name = st.sidebar.selectbox("Choose a sample audio:", list(sample_files.keys()))
+
+# Main Input Method: File Uploader or Selected Sample
+active_audio_path = None
+temp_audio_path = "temp_active.wav"
+
+if selected_sample_name != "Select a sample...":
+    sample_path = sample_files[selected_sample_name]
+    if os.path.exists(sample_path):
+        active_audio_path = sample_path
+    else:
+        st.sidebar.error(f"Sample file not found at {sample_path}. Please place .wav files in the 'samples/' folder.")
+
+# Fallback to file uploader if no sample is chosen
+uploaded_file = st.file_uploader("Or upload your own speech audio file (.wav)", type=["wav"])
 
 if uploaded_file is not None:
-    # Save uploaded file temporarily
-    temp_audio_path = "temp_uploaded.wav"
     with open(temp_audio_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
+    active_audio_path = temp_audio_path
 
+# Process and Display if audio source is available
+if active_audio_path is not None:
     col1, col2 = st.columns(2)
 
     with col1:
         st.subheader("Audio Playback")
-        st.audio(temp_audio_path, format="audio/wav")
+        st.audio(active_audio_path, format="audio/wav")
 
     with col2:
         st.subheader("Mel-Spectrogram")
-        # Generate Spectrogram Visual
-        y, sr = librosa.load(temp_audio_path, sr=None)
+        y, sr = librosa.load(active_audio_path, sr=None)
         mel_spect = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128, fmax=8000)
         mel_spect_db = librosa.power_to_db(mel_spect, ref=np.max)
 
@@ -92,7 +116,6 @@ if uploaded_file is not None:
 
     if model is not None:
         with st.spinner("Analyzing emotion..."):
-            # Process Spectrogram Image for Model
             temp_img_path = "temp_spec.png"
             plt.figure(figsize=(3, 3))
             plt.axis('off')
@@ -109,10 +132,7 @@ if uploaded_file is not None:
 
             if os.path.exists(temp_img_path):
                 os.remove(temp_img_path)
-            if os.path.exists(temp_audio_path):
-                os.remove(temp_audio_path)
 
-        # Display Results
         predicted_idx = np.argmax(probabilities)
         predicted_emotion = EMOTION_MAP[predicted_idx]
         confidence = probabilities[predicted_idx] * 100
@@ -120,10 +140,8 @@ if uploaded_file is not None:
         st.markdown("---")
         st.subheader("Prediction Results")
         
-        # Highlight Main Prediction
         st.success(f"### Predicted Emotion: **{predicted_emotion.upper()}** ({confidence:.2f}% Confidence)")
 
-        # Probability Breakdown Chart
         prob_df = pd.DataFrame({
             "Emotion": [EMOTION_MAP[i] for i in range(8)],
             "Confidence (%)": probabilities * 100

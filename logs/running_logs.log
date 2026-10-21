@@ -199,3 +199,74 @@ x==========x]
 
 x==========x]
 [2026-10-21 12:32:15,164: INFO: prediction: Audio Path: data/Actor_01/03-01-01-01-01-01-01.wav | Predicted Emotion: fearful (67.18%)]
+[2026-10-21 13:23:14,695: INFO: stage_01_data_transformation: >>>>>> stage Data Transformation & Feature Extraction Stage started <<<<<<]
+[2026-10-21 13:23:14,696: INFO: common: yaml file: config\config.yaml loaded successfully]
+[2026-10-21 13:23:14,697: INFO: common: yaml file: params.yaml loaded successfully]
+[2026-10-21 13:23:14,698: INFO: common: created directory at: artifacts]
+[2026-10-21 13:23:14,698: INFO: common: created directory at: artifacts\feature_extraction]
+[2026-10-21 13:23:14,698: INFO: feature_extraction: Starting actor-independent feature extraction for 24 actors...]
+[2026-10-21 13:24:40,297: INFO: feature_extraction: Actor-independent feature extraction complete! Processed and saved 1440 spectrograms.]
+[2026-10-21 13:24:40,297: INFO: stage_01_data_transformation: >>>>>> stage Data Transformation & Feature Extraction Stage completed <<<<<<
+
+x==========x]
+[2026-10-21 13:24:47,725: INFO: stage_02_model_trainer: >>>>>> stage Model Training Stage started <<<<<<]
+[2026-10-21 13:24:47,726: INFO: common: yaml file: config\config.yaml loaded successfully]
+[2026-10-21 13:24:47,727: INFO: common: yaml file: params.yaml loaded successfully]
+[2026-10-21 13:24:47,728: INFO: common: created directory at: artifacts]
+[2026-10-21 13:24:47,728: INFO: common: created directory at: artifacts\training]
+[2026-10-21 13:24:47,780: INFO: model_trainer: Actor-independent dataset loaded: 1200 training samples, 240 test samples.]
+[2026-10-21 13:24:48,513: INFO: model_trainer: Starting training on device: cuda for 10 epochs...]
+[2026-10-21 13:25:00,964: INFO: model_trainer: Epoch [1/10] | Train Loss: 1.3684 | Train Acc: 0.5000 | Val Loss: 4.1801 | Val Acc: 0.3250]
+[2026-10-21 13:25:12,459: INFO: model_trainer: Epoch [2/10] | Train Loss: 0.8171 | Train Acc: 0.7175 | Val Loss: 1.5506 | Val Acc: 0.5042]
+[2026-10-21 13:25:23,817: INFO: model_trainer: Epoch [3/10] | Train Loss: 0.5372 | Train Acc: 0.8125 | Val Loss: 2.4061 | Val Acc: 0.3833]
+[2026-10-21 13:25:34,877: INFO: model_trainer: Epoch [4/10] | Train Loss: 0.3727 | Train Acc: 0.8708 | Val Loss: 1.6268 | Val Acc: 0.5542]
+[2026-10-21 13:25:45,868: INFO: model_trainer: Epoch [5/10] | Train Loss: 0.3392 | Train Acc: 0.8842 | Val Loss: 3.2468 | Val Acc: 0.4500]
+[2026-10-21 13:25:56,825: INFO: model_trainer: Epoch [6/10] | Train Loss: 0.1119 | Train Acc: 0.9700 | Val Loss: 1.3361 | Val Acc: 0.5958]
+[2026-10-21 13:26:07,870: INFO: model_trainer: Epoch [7/10] | Train Loss: 0.0548 | Train Acc: 0.9867 | Val Loss: 1.3269 | Val Acc: 0.6208]
+[2026-10-21 13:26:19,070: INFO: model_trainer: Epoch [8/10] | Train Loss: 0.0292 | Train Acc: 1.0000 | Val Loss: 1.3522 | Val Acc: 0.5875]
+[2026-10-21 13:26:30,065: INFO: model_trainer: Epoch [9/10] | Train Loss: 0.0180 | Train Acc: 0.9992 | Val Loss: 1.3056 | Val Acc: 0.6333]
+[2026-10-21 13:26:41,125: INFO: model_trainer: Epoch [10/10] | Train Loss: 0.0155 | Train Acc: 0.9992 | Val Loss: 1.4286 | Val Acc: 0.6125]
+[2026-10-21 13:26:41,161: INFO: model_trainer: Trained model successfully saved at: artifacts\training\model.pth]
+[2026-10-21 13:26:44,775: INFO: stage_02_model_trainer: >>>>>> stage Model Training Stage completed <<<<<<
+
+x==========x]
+[2026-10-21 13:26:48,504: INFO: stage_03_model_evaluation: >>>>>> stage Model Evaluation Stage started <<<<<<]
+[2026-10-21 13:26:48,505: INFO: common: yaml file: config\config.yaml loaded successfully]
+[2026-10-21 13:26:48,507: INFO: common: yaml file: params.yaml loaded successfully]
+[2026-10-21 13:26:48,507: INFO: common: created directory at: artifacts]
+[2026-10-21 13:26:48,508: INFO: common: created directory at: artifacts\evaluation]
+[2026-10-21 13:26:48,715: ERROR: stage_03_model_evaluation: Error(s) in loading state_dict for ResNet:
+	size mismatch for fc.weight: copying a param with shape torch.Size([8, 512]) from checkpoint, the shape in current model is torch.Size([2, 512]).
+	size mismatch for fc.bias: copying a param with shape torch.Size([8]) from checkpoint, the shape in current model is torch.Size([2]).]
+Traceback (most recent call last):
+  File "C:\Users\antek\Audio_ml\src\speechEmotion\pipeline\stage_03_model_evaluation.py", line 21, in <module>
+    obj.main()
+  File "C:\Users\antek\Audio_ml\src\speechEmotion\pipeline\stage_03_model_evaluation.py", line 15, in main
+    model_evaluation.evaluate()
+  File "C:\Users\antek\Audio_ml\src\speechEmotion\components\model_evaluation.py", line 48, in evaluate
+    model.load_state_dict(torch.load(self.config.model_path, map_location=self.device))
+  File "C:\Users\antek\Audio_ml\venv\Lib\site-packages\torch\nn\modules\module.py", line 2639, in load_state_dict
+    raise RuntimeError(
+RuntimeError: Error(s) in loading state_dict for ResNet:
+	size mismatch for fc.weight: copying a param with shape torch.Size([8, 512]) from checkpoint, the shape in current model is torch.Size([2, 512]).
+	size mismatch for fc.bias: copying a param with shape torch.Size([8]) from checkpoint, the shape in current model is torch.Size([2]).
+[2026-10-21 13:28:47,037: INFO: stage_03_model_evaluation: >>>>>> stage Model Evaluation Stage started <<<<<<]
+[2026-10-21 13:28:47,038: INFO: common: yaml file: config\config.yaml loaded successfully]
+[2026-10-21 13:28:47,039: INFO: common: yaml file: params.yaml loaded successfully]
+[2026-10-21 13:28:47,039: INFO: common: created directory at: artifacts]
+[2026-10-21 13:28:47,039: INFO: common: created directory at: artifacts\evaluation]
+[2026-10-21 13:28:47,208: INFO: model_evaluation: Running evaluation on actor-independent test dataset...]
+[2026-10-21 13:28:53,376: INFO: common: json file saved at: artifacts\evaluation\metrics.json]
+[2026-10-21 13:28:53,376: INFO: model_evaluation: Evaluation metrics saved to artifacts\evaluation\metrics.json]
+[2026-10-21 13:28:54,114: INFO: model_evaluation: Test Loss: 1.4286 | Test Accuracy: 0.6125]
+[2026-10-21 13:28:54,115: INFO: stage_03_model_evaluation: >>>>>> stage Model Evaluation Stage completed <<<<<<
+
+x==========x]
+[2026-10-21 13:31:07,054: INFO: stage_02_model_trainer: >>>>>> stage Model Training Stage started <<<<<<]
+[2026-10-21 13:31:07,055: INFO: common: yaml file: config\config.yaml loaded successfully]
+[2026-10-21 13:31:07,057: INFO: common: yaml file: params.yaml loaded successfully]
+[2026-10-21 13:31:07,057: INFO: common: created directory at: artifacts]
+[2026-10-21 13:31:07,058: INFO: common: created directory at: artifacts\training]
+[2026-10-21 13:31:07,108: INFO: model_trainer: Actor-independent dataset loaded: 1200 training samples, 240 test samples.]
+[2026-10-21 13:31:10,279: INFO: model_trainer: Starting training on device: cuda for 25 epochs...]
+[2026-10-21 13:31:22,177: INFO: model_trainer: Epoch [1/25] | Train Loss: 1.3870 | Train Acc: 0.4908 | Val Loss: 2.2452 | Val Acc: 0.4000]
