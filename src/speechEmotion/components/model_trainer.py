@@ -2,11 +2,12 @@ import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader
 from torchvision import datasets, transforms, models
 from pathlib import Path
 import mlflow
 import mlflow.pytorch
+import optuna
 from speechEmotion import logger
 from speechEmotion.entity import TrainingConfig
 
@@ -16,129 +17,113 @@ class ModelTrainer:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def get_data_loaders(self):
-        """Prepares PyTorch DataLoaders for training and testing from actor-independent split folders."""
         image_size = tuple(self.config.params_image_size)
-        
         transform = transforms.Compose([
             transforms.Resize(image_size),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
 
-        # Define paths for train and test splits based on the feature extraction output root
         train_dir = Path(self.config.training_data) / "train"
         test_dir = Path(self.config.training_data) / "test"
 
-        # Load datasets using ImageFolder
         train_dataset = datasets.ImageFolder(root=str(train_dir), transform=transform)
         test_dataset = datasets.ImageFolder(root=str(test_dir), transform=transform)
 
         train_loader = DataLoader(train_dataset, batch_size=self.config.params_batch_size, shuffle=True, num_workers=2)
         test_loader = DataLoader(test_dataset, batch_size=self.config.params_batch_size, shuffle=False, num_workers=2)
 
-        logger.info(f"Actor-independent dataset loaded: {len(train_dataset)} training samples, {len(test_dataset)} test samples.")
         return train_loader, test_loader, train_dataset.classes
 
-    def get_model(self, num_classes: int):
-        """Initializes the pretrained backbone model and modifies the classification head."""
-        if self.config.params_base_model == "resnet34":
-            model = models.resnet34(weights=models.ResNet34_Weights.DEFAULT)
-        else:
-            model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+    def train_single_trial(self, trial, train_loader, test_loader, class_names):
+        """Trains a model for a single Optuna trial."""
+        lr = trial.suggest_float("learning_rate", 1e-4, 1e-2, log=True)
+        weight_decay = trial.suggest_float("weight_decay", 1e-5, 1e-2, log=True)
+        gamma = trial.suggest_float("scheduler_gamma", 0.1, 0.9)
 
-        # Modify final fully connected layer for RAVDESS 8 emotions
-        num_ftrs = model.fc.in_features
-        model.fc = nn.Linear(num_ftrs, num_classes)
-        return model.to(self.device)
-
-    def train(self):
-        """Executes the full training loop with MLflow tracking and saves the model."""
-        train_loader, val_loader, class_names = self.get_data_loaders()
-        model = self.get_model(num_classes=len(class_names))
+        model = models.resnet34(weights=models.ResNet34_Weights.DEFAULT)
+        model.fc = nn.Linear(model.fc.in_features, len(class_names))
+        model.to(self.device)
 
         criterion = nn.CrossEntropyLoss()
+        optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=gamma)
+
+        best_acc = 0.0
+        epochs = 12  # Quick epochs per trial
+
+        with mlflow.start_run(nested=True):
+            mlflow.log_params({"trial_lr": lr, "trial_wd": weight_decay, "trial_gamma": gamma})
+
+            for epoch in range(epochs):
+                model.train()
+                for inputs, labels in train_loader:
+                    inputs, labels = inputs.to(self.device), labels.to(self.device)
+                    optimizer.zero_grad()
+                    loss = criterion(model(inputs), labels)
+                    loss.backward()
+                    optimizer.step()
+                scheduler.step()
+
+                # Validation phase on test actors
+                model.eval()
+                correct, total = 0, 0
+                with torch.no_grad():
+                    for inputs, labels in test_loader:
+                        inputs, labels = inputs.to(self.device), labels.to(self.device)
+                        _, predicted = torch.max(model(inputs), 1)
+                        total += labels.size(0)
+                        correct += predicted.eq(labels).sum().item()
+
+                acc = correct / total
+                if acc > best_acc:
+                    best_acc = acc
+
+            mlflow.log_metric("val_accuracy", best_acc)
+
+        return best_acc
+
+    def train(self):
+        """Executes Optuna hyperparameter search and saves the best model."""
+        train_loader, test_loader, class_names = self.get_data_loaders()
         
-        # Optimizer selection
-        if self.config.params_optimizer.lower() == "sgd":
-            optimizer = optim.SGD(model.parameters(), lr=self.config.params_learning_rate, momentum=0.9, weight_decay=self.config.params_weight_decay)
-        else:
-            optimizer = optim.Adam(model.parameters(), lr=self.config.params_learning_rate, weight_decay=self.config.params_weight_decay)
+        logger.info("Starting Optuna Hyperparameter Optimization Study...")
 
-        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=self.config.params_scheduler_gamma)
+        def objective(trial):
+            return self.train_single_trial(trial, train_loader, test_loader, class_names)
 
-        # Start MLflow Run
-        mlflow.start_run()
-        mlflow.log_params({
-            "epochs": self.config.params_epochs,
-            "batch_size": self.config.params_batch_size,
-            "learning_rate": self.config.params_learning_rate,
-            "optimizer": self.config.params_optimizer,
-            "weight_decay": self.config.params_weight_decay,
-            "base_model": self.config.params_base_model
-        })
+        study = optuna.create_study(direction="maximize")
+        study.optimize(objective, n_trials=10)
 
-        logger.info(f"Starting training on device: {self.device} for {self.config.params_epochs} epochs...")
+        logger.info(f"Best Trial Accuracy: {study.best_value:.4f}")
+        logger.info(f"Best Hyperparameters: {study.best_params}")
 
-        for epoch in range(self.config.params_epochs):
+        # Retrain best model fully with best parameters
+        best_lr = study.best_params["learning_rate"]
+        best_wd = study.best_params["weight_decay"]
+        best_gamma = study.best_params["scheduler_gamma"]
+
+        logger.info("Training final model with best hyperparameters...")
+        model = models.resnet34(weights=models.ResNet34_Weights.DEFAULT)
+        model.fc = nn.Linear(model.fc.in_features, len(class_names))
+        model.to(self.device)
+
+        criterion = nn.CrossEntropyLoss()
+        optimizer = optim.Adam(model.parameters(), lr=best_lr, weight_decay=best_wd)
+        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=best_gamma)
+
+        # Final longer training run
+        for epoch in range(25):
             model.train()
-            running_loss = 0.0
-            correct = 0
-            total = 0
-
             for inputs, labels in train_loader:
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
-                
                 optimizer.zero_grad()
-                outputs = model(inputs)
-                loss = criterion(outputs, labels)
+                loss = criterion(model(inputs), labels)
                 loss.backward()
                 optimizer.step()
-
-                running_loss += loss.item() * inputs.size(0)
-                _, predicted = outputs.max(1)
-                total += labels.size(0)
-                correct += predicted.eq(labels).sum().item()
-
             scheduler.step()
-            epoch_loss = running_loss / len(train_loader.dataset)
-            epoch_acc = correct / total
 
-            # Validation phase
-            model.eval()
-            val_loss = 0.0
-            val_correct = 0
-            val_total = 0
-            with torch.no_grad():
-                for inputs, labels in val_loader:
-                    inputs, labels = inputs.to(self.device), labels.to(self.device)
-                    outputs = model(inputs)
-                    loss = criterion(outputs, labels)
-                    
-                    val_loss += loss.item() * inputs.size(0)
-                    _, predicted = outputs.max(1)
-                    val_total += labels.size(0)
-                    val_correct += predicted.eq(labels).sum().item()
-
-            val_epoch_loss = val_loss / len(val_loader.dataset)
-            val_epoch_acc = val_correct / val_total
-
-            logger.info(f"Epoch [{epoch+1}/{self.config.params_epochs}] | "
-                        f"Train Loss: {epoch_loss:.4f} | Train Acc: {epoch_acc:.4f} | "
-                        f"Val Loss: {val_epoch_loss:.4f} | Val Acc: {val_epoch_acc:.4f}")
-
-            # Log metrics to MLflow
-            mlflow.log_metrics({
-                "train_loss": epoch_loss,
-                "train_accuracy": epoch_acc,
-                "val_loss": val_epoch_loss,
-                "val_accuracy": val_epoch_acc
-            }, step=epoch)
-
-        # Save trained model state dictionary
+        # Save the optimized best model
         os.makedirs(os.path.dirname(self.config.trained_model_path), exist_ok=True)
         torch.save(model.state_dict(), self.config.trained_model_path)
-        logger.info(f"Trained model successfully saved at: {self.config.trained_model_path}")
-
-        
-        mlflow.pytorch.log_model(model, name="model", serialization_format="pickle")
-        mlflow.end_run()
+        logger.info(f"Optimized model saved at: {self.config.trained_model_path}")

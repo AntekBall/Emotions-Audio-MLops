@@ -35,18 +35,18 @@ stages:
       size: 812
     params:
       params.yaml:
-        BASE_MODEL: resnet18
+        BASE_MODEL: resnet34
         BATCH_SIZE: 32
-        EPOCHS: 10
-        LEARNING_RATE: 0.001
+        EPOCHS: 25
+        LEARNING_RATE: 0.0005
         OPTIMIZER: adam
-        SCHEDULER_GAMMA: 0.1
-        WEIGHT_DECAY: 0.0001
+        SCHEDULER_GAMMA: 0.5
+        WEIGHT_DECAY: 0.0005
     outs:
     - path: artifacts/training/model.pth
       hash: md5
-      md5: dc383ae87d0e1e0a43d84578e19a9e86
-      size: 44794955
+      md5: 4e46f7804c96b255b401336dda26b7df
+      size: 85283531
   model_evaluation:
     cmd: python src/speechEmotion/pipeline/stage_03_model_evaluation.py
     deps:
